@@ -2,7 +2,7 @@
 
 产品版本以 `release_history.json` 为唯一发布记录；Alembic revision 仅代表数据库结构版本。
 
-> **发布候选状态（2026-10-20）：** 当前源码包版本为 `0.4.0`，`release_history.json` 将其标记为 `source_candidate`；v0.3.3 的正式历史记录保留。此状态不是 GitHub Release、发布 Tag 或正式服务升级声明。R4a-3 的安装/回归结果以 `docs/releases/FINAL_RELEASE_APPROVAL.md` 为准。
+> **发布候选状态（2026-10-20）：** 当前源码包版本为 `0.4.0`，`release_history.json` 将其标记为 `source_candidate`；v0.3.3 的正式历史记录保留。此状态不是 GitHub Release、发布 Tag 或正式服务升级声明。R4a-3 安装/回归结果见 `docs/releases/RELEASE_CANDIDATE_CHECKLIST.md` 的最终候选附录；独立负责人审批报告不随源码分发。
 
 - R4a-3 候选复验：锁定依赖安装与锁检查通过；后端 pytest `195 passed, 23 warnings`；前端 Vitest `39 passed`；TypeScript 通过；隔离 Playwright `5 passed`。一次旧的 Engineering Journal 版本文案断言先失败，更新为 Source Release Candidate 后通过。运行范围为同一 Windows 主机、合成数据和 Mock Provider；空库 Alembic 迁移、本机初始化管理员及交互式邀请码 CLI 也通过。Vite 仍有 >500 kB chunk 提示；最终逐项状态见 Release Candidate Checklist。
 
