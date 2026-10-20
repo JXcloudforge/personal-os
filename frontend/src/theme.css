@@ -1,0 +1,518 @@
+
+/* K1: readable conversation typography and a reversible workspace rail. */
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei UI',
+    'PingFang SC', 'Noto Sans CJK SC', 'Noto Sans SC', Arial, sans-serif;
+}
+body, input, textarea, select, button { font-family: inherit; font-style: normal; }
+button, input, textarea, select { font-size: 14px; }
+input::placeholder, textarea::placeholder { opacity: 1; color: var(--muted); }
+.chat-workspace-wrap { max-width: none; width: 100%; }
+.chat-workspace { max-width: none; width: 100%; min-height: 0; }
+.chat-workspace.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+.chat-workspace.sidebar-collapsed .chat-workspace-sidebar { display: none; }
+.chat-heading-title { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.chat-desktop-expand, .chat-desktop-collapse { flex: 0 0 auto; }
+.chat-linked-task-link { display: flex; flex-direction: column; gap: 3px; width: 100%; text-align: left; padding: 8px 10px; background: transparent; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); }
+.chat-linked-task-link:hover, .chat-linked-task-link:focus-visible { border-color: var(--blue); }
+.chat-linked-task-link span { color: var(--muted); font-size: 12px; }
+.chat-load-older { display: flex; margin: 8px auto 16px; min-height: 38px; }
+.chat-message.from-agent { max-width: min(850px, 96%); }
+.chat-message-content { max-width: 80ch; font-size: 16px; line-height: 1.7; color: var(--ink); font-weight: 400; font-style: normal; white-space: pre-wrap; }
+.chat-message.from-agent .chat-message-content { max-width: 78ch; }
+.chat-message header { font-size: 13px; }
+.chat-message time, .chat-message small { font-size: 11px; color: var(--muted); }
+.chat-provenance, .chat-export-scope, .chat-linked-tasks { font-size: 12px; line-height: 1.55; }
+.chat-message-content pre, .chat-message-content code { font-family: 'Cascadia Code', 'Consolas', 'SFMono-Regular', monospace; font-style: normal; }
+.chat-message-content pre { max-width: 100%; overflow-x: auto; padding: 12px; border-radius: 7px; background: color-mix(in srgb, var(--ink) 7%, var(--paper)); }
+.chat-message-content a { color: var(--blue); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+.chat-composer textarea { font-size: 16px; line-height: 1.6; color: var(--ink); }
+.chat-main-heading h2 { font-size: clamp(20px, 1.6vw, 24px); line-height: 1.3; letter-spacing: 0; }
+html[data-theme='cyberpunk-night'] .chat-workspace-wrap > .chat-workspace.sidebar-collapsed { grid-template-columns: minmax(0, 1fr); }
+html[data-theme='cyberpunk-night'] .chat-message-content { font-size: 16px; line-height: 1.7; color: #e8edf3; }
+html[data-theme='cyberpunk-night'] .chat-message time,
+html[data-theme='cyberpunk-night'] .chat-message small { color: #afbfcd; }
+html[data-theme='cyberpunk-night'] .chat-message.from-agent { background: rgba(16, 27, 38, .98); }
+@media (max-width: 850px) {
+  .chat-desktop-expand, .chat-desktop-collapse { display: none; }
+  .chat-workspace.sidebar-collapsed { display: flex; }
+  .chat-workspace-sidebar.is-open { display: flex; }
+  .chat-workspace.sidebar-collapsed .chat-workspace-sidebar.is-open { display: flex; }
+  .chat-workspace.sidebar-collapsed .chat-workspace-main { flex: 1; }
+  .chat-message-content, html[data-theme='cyberpunk-night'] .chat-message-content { font-size: 15px; line-height: 1.7; }
+  .chat-message.from-agent { max-width: 100%; }
+}
+
+html[data-theme='cyberpunk-night'] {
+  color-scheme: dark;
+  --ink: #e8edf3;
+  --muted: #9fb0c0;
+  --line: rgba(140, 166, 185, .2);
+  --paper: rgba(23, 35, 47, .97);
+  --green: #00d8e6;
+  --amber: #e9c752;
+  --violet: #ef6575;
+  --blue: #00d8e6;
+  --theme-background-art: none;
+  --theme-background-darkness: 54%;
+  --theme-background-blur: 1px;
+  --theme-background-opacity: 68%;
+  color: var(--ink);
+  background: #0b1018;
+}
+
+html[data-theme='cyberpunk-night'] body {
+  position: relative;
+  isolation: isolate;
+  color: var(--ink);
+  background: linear-gradient(135deg, #0b1018, #101923 55%, #0b1018);
+}
+
+html[data-theme='cyberpunk-night'] body::before,
+html[data-theme='cyberpunk-night'] body::after {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  content: '';
+  pointer-events: none;
+}
+
+html[data-theme='cyberpunk-night'] body::before {
+  background-image:
+    var(--theme-background-art),
+    radial-gradient(ellipse at 82% 18%, rgba(0, 216, 230, .2), transparent 32%),
+    radial-gradient(ellipse at 12% 76%, rgba(239, 101, 117, .12), transparent 30%),
+    linear-gradient(112deg, transparent 0 56%, rgba(233, 199, 82, .055) 56.15% 56.3%, transparent 56.45%),
+    linear-gradient(180deg, #101923, #0b1018 75%);
+  background-position: center;
+  background-size: cover;
+  opacity: var(--theme-background-opacity);
+  filter: blur(min(var(--theme-background-blur), 1px));
+  transform: scale(1.01);
+}
+
+html[data-theme='cyberpunk-night'] body::after {
+  background: rgba(3, 6, 12, var(--theme-background-darkness));
+}
+
+html[data-theme='cyberpunk-night'] .shell,
+html[data-theme='cyberpunk-night'] .main,
+html[data-theme='cyberpunk-night'] .content,
+html[data-theme='cyberpunk-night'] .topbar {
+  color: var(--ink);
+  background: transparent;
+}
+
+html[data-theme='cyberpunk-night'] .sidebar {
+  color: #dce6eb;
+  background: rgba(7, 12, 19, .96);
+  border-right: 1px solid rgba(83, 232, 227, .25);
+  box-shadow: 12px 0 42px rgba(0, 0, 0, .28);
+}
+
+html[data-theme='cyberpunk-night'] .sidebar-head,
+html[data-theme='cyberpunk-night'] .topbar,
+html[data-theme='cyberpunk-night'] .panel,
+html[data-theme='cyberpunk-night'] .gate-card,
+html[data-theme='cyberpunk-night'] .chat-workspace-sidebar,
+html[data-theme='cyberpunk-night'] .chat-workspace-main,
+html[data-theme='cyberpunk-night'] .settings-nav {
+  border-color: var(--line);
+  background-color: var(--paper);
+  box-shadow: 0 12px 42px rgba(0, 0, 0, .24);
+}
+
+html[data-theme='cyberpunk-night'] .topbar {
+  border-bottom: 1px solid rgba(83, 232, 227, .18);
+  backdrop-filter: blur(14px);
+}
+
+html[data-theme='cyberpunk-night'] .nav-item,
+html[data-theme='cyberpunk-night'] .settings-tab,
+html[data-theme='cyberpunk-night'] .chat-domain,
+html[data-theme='cyberpunk-night'] .chat-filter,
+html[data-theme='cyberpunk-night'] .text-btn {
+  color: #c4d0d7;
+}
+
+html[data-theme='cyberpunk-night'] .nav-item:hover,
+html[data-theme='cyberpunk-night'] .nav-item.active,
+html[data-theme='cyberpunk-night'] .settings-tab:hover,
+html[data-theme='cyberpunk-night'] .settings-tab.active,
+html[data-theme='cyberpunk-night'] .chat-domain.active,
+html[data-theme='cyberpunk-night'] .chat-filter.active {
+  color: #fff786;
+  background: rgba(241, 230, 75, .1);
+  box-shadow: inset 2px 0 #f1e64b;
+}
+
+html[data-theme='cyberpunk-night'] .eyebrow,
+html[data-theme='cyberpunk-night'] .nav-label,
+html[data-theme='cyberpunk-night'] .topbar .status-dot,
+html[data-theme='cyberpunk-night'] .tag {
+  color: #58dedb;
+}
+
+html[data-theme='cyberpunk-night'] .tag,
+html[data-theme='cyberpunk-night'] .chat-action,
+html[data-theme='cyberpunk-night'] .secondary {
+  border: 1px solid rgba(83, 232, 227, .3);
+  background: rgba(14, 31, 40, .92);
+  color: #8ff3ee;
+}
+
+html[data-theme='cyberpunk-night'] .primary {
+  border: 1px solid rgba(255, 247, 112, .7);
+  background: #f1e64b;
+  color: #171b19;
+  box-shadow: 0 0 20px rgba(241, 230, 75, .16);
+}
+
+html[data-theme='cyberpunk-night'] .primary:hover {
+  background: #fff477;
+  box-shadow: 0 0 25px rgba(241, 230, 75, .28);
+}
+
+html[data-theme='cyberpunk-night'] .secondary:hover,
+html[data-theme='cyberpunk-night'] .chat-action:hover {
+  background: rgba(22, 57, 66, .96);
+}
+
+html[data-theme='cyberpunk-night'] input,
+html[data-theme='cyberpunk-night'] textarea,
+html[data-theme='cyberpunk-night'] select,
+html[data-theme='cyberpunk-night'] .quick-add,
+html[data-theme='cyberpunk-night'] .module-tile,
+html[data-theme='cyberpunk-night'] .assistant,
+html[data-theme='cyberpunk-night'] .assistant textarea,
+html[data-theme='cyberpunk-night'] .assistant-panel textarea,
+html[data-theme='cyberpunk-night'] .chat-composer textarea,
+html[data-theme='cyberpunk-night'] .chat-message,
+html[data-theme='cyberpunk-night'] .chat-linked-tasks,
+html[data-theme='cyberpunk-night'] .chat-task-proposal,
+html[data-theme='cyberpunk-night'] .usage-period,
+html[data-theme='cyberpunk-night'] .task-search,
+html[data-theme='cyberpunk-night'] .task-detail-form input,
+html[data-theme='cyberpunk-night'] .task-detail-form textarea,
+html[data-theme='cyberpunk-night'] .task-detail-form select,
+html[data-theme='cyberpunk-night'] .task-evidence-form textarea,
+html[data-theme='cyberpunk-night'] .chat-manual-task input {
+  border-color: #31434d;
+  background-color: rgba(5, 11, 18, .88);
+  color: #e6edf2;
+}
+
+html[data-theme='cyberpunk-night'] input::placeholder,
+html[data-theme='cyberpunk-night'] textarea::placeholder {
+  color: #8999a2;
+}
+
+html[data-theme='cyberpunk-night'] input:focus-visible,
+html[data-theme='cyberpunk-night'] textarea:focus-visible,
+html[data-theme='cyberpunk-night'] select:focus-visible,
+html[data-theme='cyberpunk-night'] button:focus-visible {
+  outline: 2px solid #53e8e3;
+  outline-offset: 2px;
+}
+
+html[data-theme='cyberpunk-night'] .task-row,
+html[data-theme='cyberpunk-night'] .task-workspace-row,
+html[data-theme='cyberpunk-night'] .task-evidence-row,
+html[data-theme='cyberpunk-night'] .task-history-row,
+html[data-theme='cyberpunk-night'] .task-link-row,
+html[data-theme='cyberpunk-night'] .usage-models > div,
+html[data-theme='cyberpunk-night'] .usage-request-list article,
+html[data-theme='cyberpunk-night'] .chat-message,
+html[data-theme='cyberpunk-night'] .task-subsection {
+  border-color: rgba(117, 145, 157, .23);
+}
+
+html[data-theme='cyberpunk-night'] .task-workspace-row.active,
+html[data-theme='cyberpunk-night'] .chat-message.from-user,
+html[data-theme='cyberpunk-night'] .ai-reply,
+html[data-theme='cyberpunk-night'] .proposal-card,
+html[data-theme='cyberpunk-night'] .chat-privacy-hint {
+  border-color: rgba(83, 232, 227, .32);
+  background: rgba(18, 45, 53, .76);
+  color: #dff8f6;
+}
+
+html[data-theme='cyberpunk-night'] .task-status,
+html[data-theme='cyberpunk-night'] .module-icon {
+  background: rgba(241, 230, 75, .12);
+  color: #f1e64b;
+}
+
+html[data-theme='cyberpunk-night'] .task-status.done,
+html[data-theme='cyberpunk-night'] .success-notice { color: #58d68d; }
+html[data-theme='cyberpunk-night'] .task-status.blocked,
+html[data-theme='cyberpunk-night'] .error,
+html[data-theme='cyberpunk-night'] .error-notice { color: #ff79b8; }
+html[data-theme='cyberpunk-night'] .notice { background: rgba(17, 45, 51, .94); color: #baf7f2; }
+html[data-theme='cyberpunk-night'] .error-notice { background: rgba(74, 22, 48, .95); }
+html[data-theme='cyberpunk-night'] .gate-card { box-shadow: 0 0 0 1px rgba(83, 232, 227, .1), 0 24px 70px rgba(0, 0, 0, .45); }
+html[data-theme='cyberpunk-night'] .brand-mark { background: #f1e64b; color: #111820; }
+html[data-theme='cyberpunk-night'] .status-dot > span { background: #58d68d; box-shadow: 0 0 9px #58d68d; }
+
+/* Shared surfaces: keep the existing Classic theme untouched while removing
+   hard-coded light surfaces from the Cyberpunk Night component styles. */
+html[data-theme='cyberpunk-night'] {
+  scrollbar-color: #405766 transparent;
+  scrollbar-width: thin;
+}
+html[data-theme='cyberpunk-night'] ::-webkit-scrollbar { width: 8px; height: 8px; }
+html[data-theme='cyberpunk-night'] ::-webkit-scrollbar-thumb { background: #405766; border: 2px solid transparent; border-radius: 8px; background-clip: padding-box; }
+html[data-theme='cyberpunk-night'] ::-webkit-scrollbar-track { background: transparent; }
+html[data-theme='cyberpunk-night'] .panel,
+html[data-theme='cyberpunk-night'] .metric,
+html[data-theme='cyberpunk-night'] .signal-card,
+html[data-theme='cyberpunk-night'] .agent-plan,
+html[data-theme='cyberpunk-night'] .proposal-card,
+html[data-theme='cyberpunk-night'] .proposal-item,
+html[data-theme='cyberpunk-night'] .review-draft,
+html[data-theme='cyberpunk-night'] .release-card,
+html[data-theme='cyberpunk-night'] .settings-categories .settings-tab[aria-selected='true'],
+html[data-theme='cyberpunk-night'] .backup-status-grid > div,
+html[data-theme='cyberpunk-night'] .chat-linked-tasks,
+html[data-theme='cyberpunk-night'] .chat-task-proposal,
+html[data-theme='cyberpunk-night'] .tool-log,
+html[data-theme='cyberpunk-night'] .usage-period,
+html[data-theme='cyberpunk-night'] .chat-session,
+html[data-theme='cyberpunk-night'] .chat-session.active,
+html[data-theme='cyberpunk-night'] .quick-add,
+html[data-theme='cyberpunk-night'] .module-tile,
+html[data-theme='cyberpunk-night'] .assistant,
+html[data-theme='cyberpunk-night'] .ai-reply,
+html[data-theme='cyberpunk-night'] .task-search,
+html[data-theme='cyberpunk-night'] .task-filter-row select,
+html[data-theme='cyberpunk-night'] .task-link-form select,
+html[data-theme='cyberpunk-night'] .task-link-form input,
+html[data-theme='cyberpunk-night'] .chat-link-task-controls select,
+html[data-theme='cyberpunk-night'] .usage-session-select select,
+html[data-theme='cyberpunk-night'] .usage-budget-form input,
+html[data-theme='cyberpunk-night'] .chat-search,
+html[data-theme='cyberpunk-night'] .password-input,
+html[data-theme='cyberpunk-night'] .background-upload {
+  background-color: #17232f;
+  color: var(--ink);
+  border-color: var(--line);
+}
+html[data-theme='cyberpunk-night'] .agent-plan,
+html[data-theme='cyberpunk-night'] .proposal-card,
+html[data-theme='cyberpunk-night'] .proposal-item,
+html[data-theme='cyberpunk-night'] .review-draft,
+html[data-theme='cyberpunk-night'] .signal-card,
+html[data-theme='cyberpunk-night'] .metric,
+html[data-theme='cyberpunk-night'] .release-card,
+html[data-theme='cyberpunk-night'] .module-tile,
+html[data-theme='cyberpunk-night'] .ai-reply,
+html[data-theme='cyberpunk-night'] .tool-log {
+  background: rgba(23, 35, 47, .97);
+}
+html[data-theme='cyberpunk-night'] .agent-plan .muted,
+html[data-theme='cyberpunk-night'] .proposal-card > p,
+html[data-theme='cyberpunk-night'] .proposal-item small,
+html[data-theme='cyberpunk-night'] .proposal-card small,
+html[data-theme='cyberpunk-night'] .proposal-meta,
+html[data-theme='cyberpunk-night'] .signal-card > span,
+html[data-theme='cyberpunk-night'] .signal-top,
+html[data-theme='cyberpunk-night'] .release-card ul,
+html[data-theme='cyberpunk-night'] .release-problem,
+html[data-theme='cyberpunk-night'] .release-card details p,
+html[data-theme='cyberpunk-night'] .privacy-note,
+html[data-theme='cyberpunk-night'] .settings-meta,
+html[data-theme='cyberpunk-night'] .chat-export-scope,
+html[data-theme='cyberpunk-night'] .chat-message time,
+html[data-theme='cyberpunk-night'] .chat-message small,
+html[data-theme='cyberpunk-night'] .task-copy span,
+html[data-theme='cyberpunk-night'] .metric small,
+html[data-theme='cyberpunk-night'] .empty {
+  color: var(--muted);
+}
+html[data-theme='cyberpunk-night'] .chat-main-heading,
+html[data-theme='cyberpunk-night'] .chat-message,
+html[data-theme='cyberpunk-night'] .chat-message.from-user,
+html[data-theme='cyberpunk-night'] .chat-message.is-failed {
+  background: #17232f;
+  border-color: var(--line);
+  color: var(--ink);
+}
+html[data-theme='cyberpunk-night'] .chat-message.from-user { background: #142c35; border-color: rgba(0, 216, 230, .3); }
+html[data-theme='cyberpunk-night'] .chat-message.is-failed { background: #301c28; border-color: rgba(239, 101, 117, .45); }
+html[data-theme='cyberpunk-night'] .chat-search input,
+html[data-theme='cyberpunk-night'] .chat-manual-task input,
+html[data-theme='cyberpunk-night'] .agent-controls input,
+html[data-theme='cyberpunk-night'] .proposal-item input,
+html[data-theme='cyberpunk-night'] .proposal-item textarea,
+html[data-theme='cyberpunk-night'] .gate-card input,
+html[data-theme='cyberpunk-night'] .settings-form input,
+html[data-theme='cyberpunk-night'] .password-input input,
+html[data-theme='cyberpunk-night'] .assistant textarea,
+html[data-theme='cyberpunk-night'] .assistant-panel textarea,
+html[data-theme='cyberpunk-night'] .chat-composer textarea,
+html[data-theme='cyberpunk-night'] .task-detail-form input,
+html[data-theme='cyberpunk-night'] .task-detail-form textarea,
+html[data-theme='cyberpunk-night'] .task-detail-form select,
+html[data-theme='cyberpunk-night'] .task-status-picker select,
+html[data-theme='cyberpunk-night'] .task-evidence-form textarea,
+html[data-theme='cyberpunk-night'] .goal-form input,
+html[data-theme='cyberpunk-night'] .usage-session-select select,
+html[data-theme='cyberpunk-night'] .usage-budget-form input {
+  background: #101b26;
+  border-color: #354957;
+  color: var(--ink);
+}
+html[data-theme='cyberpunk-night'] .error-notice { background: rgba(74, 22, 40, .96) !important; color: #ffd8df !important; border-left-color: #ef6575 !important; }
+html[data-theme='cyberpunk-night'] .success-notice { background: rgba(20, 58, 48, .96); color: #b8f1dc; }
+html[data-theme='cyberpunk-night'] .info-notice { background: rgba(17, 45, 58, .96); color: #c8eaf3; }
+html[data-theme='cyberpunk-night'] .chat-export-scope summary,
+html[data-theme='cyberpunk-night'] .release-card summary { cursor: pointer; color: var(--muted); }
+html[data-theme='cyberpunk-night'] .primary { background: #e9c752; border-color: rgba(233, 199, 82, .65); color: #171b20; box-shadow: 0 4px 16px rgba(233, 199, 82, .1); }
+html[data-theme='cyberpunk-night'] .primary:hover { background: #f2d979; box-shadow: 0 4px 18px rgba(233, 199, 82, .18); }
+html[data-theme='cyberpunk-night'] .danger-btn,
+html[data-theme='cyberpunk-night'] .chat-action.danger,
+html[data-theme='cyberpunk-night'] .chat-message footer,
+html[data-theme='cyberpunk-night'] .task-status.blocked { color: #ef6575; }
+html[data-theme='cyberpunk-night'] .tool-log a,
+html[data-theme='cyberpunk-night'] .chat-provenance a { color: #59e4eb; }
+html[data-theme='cyberpunk-night'] .status-dot { color: var(--muted); }
+html[data-theme='cyberpunk-night'] .chat-export-scope { flex: 0 0 auto; margin: 5px 0 8px; }
+html[data-theme='cyberpunk-night'] .chat-export-scope p { margin: 6px 0; max-width: 850px; font-size: 12px; line-height: 1.55; }
+html[data-theme='cyberpunk-night'] .chat-actions .chat-action { min-height: 38px; padding: 7px 10px; font-size: 12px; }
+html[data-theme='cyberpunk-night'] .chat-linked-tasks > summary,
+html[data-theme='cyberpunk-night'] .chat-provenance > summary { color: var(--blue); font-size: 12px; }
+html[data-theme='cyberpunk-night'] .chat-composer textarea { min-height: 62px; max-height: 20dvh; resize: vertical; font-size: 15px; line-height: 1.5; }
+html[data-theme='cyberpunk-night'] .chat-composer .consent { font-size: 12px; line-height: 1.4; }
+html[data-theme='cyberpunk-night'] .chat-composer .primary { min-height: 44px; }
+html[data-theme='cyberpunk-night'] .chat-message-content { font-size: 15px; line-height: 1.75; }
+html[data-theme='cyberpunk-night'] .chat-message-content pre,
+html[data-theme='cyberpunk-night'] .chat-message-content code { max-width: 100%; overflow-x: auto; }
+html[data-theme='cyberpunk-night'] .chat-conversation,
+html[data-theme='cyberpunk-night'] .task-row,
+html[data-theme='cyberpunk-night'] .task-workspace-row { border-color: var(--line); }
+html[data-theme='cyberpunk-night'] .chat-conversation.active,
+html[data-theme='cyberpunk-night'] .task-workspace-row.active { background: rgba(0, 216, 230, .08); }
+html[data-theme='cyberpunk-night'] .chat-workspace-wrap { width: 100%; max-width: none; height: calc(100dvh - 82px); margin: 0; padding: 10px 18px 14px; overflow: hidden; }
+html[data-theme='cyberpunk-night'] .chat-workspace-wrap > .chat-workspace { width: 100%; height: 100%; min-height: 0; grid-template-columns: minmax(250px, 300px) minmax(0, 1fr); gap: 14px; padding: 0; }
+html[data-theme='cyberpunk-night'] .chat-workspace-sidebar,
+html[data-theme='cyberpunk-night'] .chat-workspace-main { background: rgba(16, 25, 35, .96); }
+html[data-theme='cyberpunk-night'] .chat-workspace-main { min-height: 0; padding: 16px 20px; }
+html[data-theme='cyberpunk-night'] .chat-message-scroll { min-height: 0; overflow-x: hidden; scrollbar-gutter: stable; }
+html[data-theme='cyberpunk-night'] .tool-log { max-height: 84px; overflow: auto; margin: 7px 0; padding: 8px 10px; }
+html[data-theme='cyberpunk-night'] .chat-main-heading h2 { font-size: 21px; }
+html[data-theme='cyberpunk-night'] .gate-card { box-shadow: 0 24px 70px rgba(0, 0, 0, .45); }
+html[data-theme='cyberpunk-night'] .gate-card input,
+html[data-theme='cyberpunk-night'] .settings-form input,
+html[data-theme='cyberpunk-night'] .chat-composer textarea,
+html[data-theme='cyberpunk-night'] .proposal-item input,
+html[data-theme='cyberpunk-night'] .proposal-item textarea { border-radius: 8px; }
+
+@media (max-width: 850px) {
+  html[data-theme='cyberpunk-night'] .chat-workspace-wrap { height: auto; min-height: 0; flex: 1 1 0; padding: 7px 10px max(10px, env(safe-area-inset-bottom)); }
+  html[data-theme='cyberpunk-night'] .chat-workspace-wrap > .chat-workspace { display: flex; flex-direction: column; gap: 7px; }
+  html[data-theme='cyberpunk-night'] .chat-workspace-main { flex: 1; padding: 11px 12px max(10px, env(safe-area-inset-bottom)); }
+  html[data-theme='cyberpunk-night'] .chat-main-heading { align-items: center; flex-wrap: wrap; gap: 8px; padding-bottom: 9px; }
+  html[data-theme='cyberpunk-night'] .chat-main-heading > div:first-child { min-width: 0; flex: 1 1 100%; }
+  html[data-theme='cyberpunk-night'] .chat-actions { width: 100%; max-width: none; justify-content: flex-start; gap: 6px; }
+  html[data-theme='cyberpunk-night'] .chat-actions .chat-action { min-height: 40px; flex: 0 0 auto; }
+  html[data-theme='cyberpunk-night'] .chat-export-scope { margin: 4px 0; }
+  html[data-theme='cyberpunk-night'] .chat-composer { gap: 8px; padding-top: 9px; }
+  html[data-theme='cyberpunk-night'] .chat-composer textarea { min-height: 54px; max-height: 16dvh; }
+  html[data-theme='cyberpunk-night'] .chat-message-scroll { flex: 1 1 0; }
+  html[data-theme='cyberpunk-night'] .chat-message-content { font-size: 14px; }
+  html[data-theme='cyberpunk-night'] .chat-message-content table { display: block; max-width: 100%; overflow-x: auto; }
+  html[data-theme='cyberpunk-night'] .tool-log { max-height: 58px; }
+  html[data-theme='cyberpunk-night'] body::before { position: fixed; inset: 0; height: 100dvh; opacity: min(var(--theme-background-opacity), 38%); filter: blur(min(var(--theme-background-blur), 1px)); transform: none; }
+  html[data-theme='cyberpunk-night'] body::after { position: fixed; inset: 0; height: 100dvh; }
+}
+
+.appearance-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.appearance-option { display: grid; grid-template-columns: 52px 1fr; grid-template-rows: auto auto; align-items: center; gap: 4px 12px; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); color: var(--ink); text-align: left; }
+.appearance-option.selected { border-color: var(--amber); box-shadow: 0 0 0 2px color-mix(in srgb, var(--amber) 22%, transparent); }
+.appearance-option strong { font-size: 13px; }
+.appearance-option small { color: var(--muted); font-size: 10px; }
+.theme-swatch { grid-row: 1 / 3; width: 52px; height: 42px; border-radius: 5px; border: 1px solid var(--line); }
+.classic-swatch { background: linear-gradient(135deg, #174d3e 0 48%, #f3efe6 48% 78%, #e3a635 78%); }
+.cyber-swatch { background: linear-gradient(135deg, #070a11 0 35%, #53e8e3 36% 39%, #10212c 40% 63%, #f1e64b 64%); }
+.appearance-controls { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(220px, .7fr); gap: 12px 24px; align-items: center; padding: 16px 0; border-top: 1px solid var(--line); }
+.appearance-controls > div { grid-row: span 3; display: grid; justify-items: start; gap: 9px; }
+.appearance-controls > label { display: grid; grid-template-columns: 1fr auto; gap: 7px 12px; color: var(--ink); font-size: 12px; }
+.appearance-controls > label span { color: var(--muted); font-variant-numeric: tabular-nums; }
+.appearance-controls input[type='range'] { grid-column: 1 / 3; width: 100%; accent-color: var(--amber); }
+.appearance-controls small { color: var(--muted); font-size: 10px; line-height: 1.5; }
+.background-upload { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 7px; color: var(--ink); cursor: pointer; font-size: 11px; }
+.background-upload input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+.appearance-settings .settings-actions { margin-top: 12px; }
+
+@media (max-width: 850px) {
+  html[data-theme='cyberpunk-night'] body::before { position: absolute; inset: 0 0 auto; height: 45vh; opacity: min(var(--theme-background-opacity), 30%); filter: blur(min(var(--theme-background-blur), 4px)); transform: none; }
+  html[data-theme='cyberpunk-night'] body::after { position: absolute; inset: 0 0 auto; height: 45vh; }
+  html[data-theme='cyberpunk-night'] .sidebar { backdrop-filter: none; }
+  .appearance-controls { grid-template-columns: 1fr; }
+  .appearance-controls > div { grid-row: auto; }
+  .appearance-options { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}
+
+html[data-theme='cyberpunk-night'] .shell:has(.chat-main) { height: 100dvh; min-height: 0; overflow: hidden; }
+html[data-theme='cyberpunk-night'] .main.chat-main { height: 100dvh; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+html[data-theme='cyberpunk-night'] .main.chat-main > .topbar { flex: 0 0 82px; height: 82px; padding: 14px 28px; align-items: center; }
+html[data-theme='cyberpunk-night'] .main.chat-main > .chat-workspace-wrap { flex: 1 1 0; }
+@media (max-width: 850px) {
+  html[data-theme='cyberpunk-night'] .main.chat-main > .topbar { flex: 0 0 auto; height: auto; padding: 12px 14px; }
+  html[data-theme='cyberpunk-night'] .main.chat-main > .chat-workspace-wrap { height: auto; min-height: 0; }
+  html[data-theme='cyberpunk-night'] body::before { position: fixed; inset: 0; height: 100dvh; opacity: min(var(--theme-background-opacity), 38%); filter: blur(min(var(--theme-background-blur), 1px)); transform: none; }
+  html[data-theme='cyberpunk-night'] body::after { position: fixed; inset: 0; height: 100dvh; }
+}
+
+.chat-message-content { white-space: normal; }
+.chat-message-content p { margin: 0 0 .85em; }
+.chat-message-content p:last-child { margin-bottom: 0; }
+.chat-message-content h1, .chat-message-content h2, .chat-message-content h3 { font-weight: 650; line-height: 1.35; margin: 1.25em 0 .5em; letter-spacing: 0; }
+.chat-message-content h1 { font-size: 22px; }
+.chat-message-content h2 { font-size: 19px; }
+.chat-message-content h3 { font-size: 17px; }
+.chat-message-content ul, .chat-message-content ol { padding-left: 1.5em; margin: .65em 0 1em; }
+.chat-message-content li + li { margin-top: .35em; }
+.chat-message-content blockquote { margin: 1em 0; padding: .25em 1em; border-left: 3px solid var(--blue); color: var(--muted); }
+.chat-message-content pre, .chat-message-content table { max-width: 100%; overflow-x: auto; }
+.chat-message-content table { display: block; border-collapse: collapse; margin: 1em 0; font-size: 14px; }
+.chat-message-content th, .chat-message-content td { border: 1px solid var(--line); padding: 7px 10px; }
+.chat-message-content code { font-family: 'Cascadia Code', Consolas, 'SFMono-Regular', monospace; overflow-wrap: anywhere; }
+.chat-message-content pre code { overflow-wrap: normal; }
+.chat-message.from-user .chat-message-content { white-space: pre-wrap; }
+html[data-theme='cyberpunk-night'] .chat-message-content { font-size: 16px; line-height: 1.7; }
+@media (max-width: 850px) {
+  .chat-workspace { position: relative; }
+  .chat-workspace .chat-workspace-sidebar.is-open,
+  .chat-workspace.sidebar-collapsed .chat-workspace-sidebar.is-open { position: absolute; z-index: 8; top: 43px; left: 0; width: min(340px, 92vw); height: min(72dvh, 650px); max-height: none; box-shadow: 0 20px 55px rgba(0,0,0,.35); }
+  .chat-workspace .chat-workspace-sidebar.is-collapsed { display: none; }
+  .chat-workspace .chat-workspace-main { flex: 1 1 0; }
+  .chat-message-content, html[data-theme='cyberpunk-night'] .chat-message-content { font-size: 15px; line-height: 1.7; }
+}
+
+.dashboard-status-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 13px 16px; border: 1px solid var(--line); border-radius: 10px; color: var(--ink); background: var(--paper); }
+.dashboard-status-strip strong { font-size: 16px; }
+.daily-review-card { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+.daily-review-card h3 { margin: 3px 0 6px; }
+.daily-review-card p:last-child { margin-bottom: 0; }
+.daily-review-form { display: grid; gap: 16px; margin-top: 16px; }
+.daily-review-form > label, .daily-review-task label { display: grid; gap: 7px; }
+.daily-review-task-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; }
+.daily-review-task-head h4 { margin: 0; }
+.daily-review-task { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--paper); }
+.daily-review-task > small { color: var(--muted); }
+.task-date-fields { margin: 6px 0; }
+.task-timeline .task-workspace-row { position: relative; margin-left: 8px; padding-left: 15px; border-left: 2px solid color-mix(in srgb, var(--blue) 45%, var(--line)); }
+.task-timeline .task-workspace-row::before { content: ''; position: absolute; left: -6px; top: 20px; width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+.proposal-inbox { display: grid; gap: 10px; }
+.proposal-inbox .task-history-row { display: grid; gap: 8px; }
+html[data-theme='cyberpunk-night'] .dashboard-status-strip, html[data-theme='cyberpunk-night'] .daily-review-task { background: rgba(16, 25, 35, .96); }
+@media (max-width: 850px) {
+  .daily-review-card, .daily-review-task-head { align-items: stretch; flex-direction: column; }
+  .daily-review-card .secondary { min-height: 44px; }
+  .task-date-fields { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Personal OS",
+  "short_name": "Personal OS",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f0e8",
+  "theme_color": "#15231f",
+  "description": "A private personal work and learning system",
+  "icons": []
+}

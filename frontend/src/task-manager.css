@@ -1,0 +1,30 @@
+.task-mode-switch{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.content.task-workspace-ai-first{width:min(94%,1580px);max-width:1580px;padding:28px 0 52px;margin-inline:auto;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);gap:18px;align-items:start}
+.task-workspace-ai-first>.task-ai-manager,.task-workspace-ai-first>.task-browser{width:100%;min-width:0}
+.task-workspace-ai-first:not(.has-selected-task)>.task-detail-panel{display:none}
+.task-workspace-ai-first.has-selected-task>.task-detail-panel{grid-column:1/-1;min-width:0}
+.task-workspace-ai-first .panel{padding:clamp(18px,2vw,28px)}
+.task-manager-form{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;gap:10px}
+.task-manager-form textarea{width:100%;min-width:0;resize:vertical;padding:12px 14px;border:1px solid var(--line);border-radius:9px;background:var(--paper);color:var(--ink);font:inherit;line-height:1.55}
+.task-manager-form textarea:focus{outline:2px solid color-mix(in srgb,var(--blue) 55%,transparent);outline-offset:1px}
+.task-manager-form>button{min-width:132px;min-height:48px;align-self:stretch}
+.task-manager-form .secondary{white-space:nowrap}
+.task-manager-history-picker{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.task-manager-history-picker select{flex:1 1 210px;min-width:0;max-width:100%}
+.task-manager-transcript{max-height:34vh;overflow:auto}
+.task-browser .task-workspace-list{max-height:min(58vh,620px)}
+.task-browser .task-workspace-row strong{font-size:14px}
+.task-browser .task-workspace-row span{font-size:12px}
+.task-ai-manager .panel-head{gap:16px}
+.task-ai-manager .panel-head>div:first-child{min-width:0}
+.task-ai-manager .panel-head h3,.task-browser .panel-head h3{font-size:20px}
+.task-timeline{min-width:0}
+.dashboard-today-tasks .recent-chat-row,.dashboard-overdue .recent-chat-row{width:100%;text-align:left}
+.dashboard-task-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);margin-top:8px;padding-top:9px;color:var(--muted);font-size:13px}
+.completed-today-row{opacity:.78}
+@media(max-width:1050px){.content.task-workspace-ai-first{grid-template-columns:1fr;width:min(94%,800px)}.task-workspace-ai-first.has-selected-task>.task-detail-panel{grid-column:auto}}
+@media(max-width:520px){.content.task-workspace-ai-first{width:100%;padding:16px 12px 36px;gap:12px}.task-workspace-ai-first .panel{padding:15px}.task-mode-switch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.task-mode-switch button{padding:9px 5px;font-size:12px}.task-manager-form{grid-template-columns:1fr}.task-manager-form>button{width:100%;min-height:48px}.task-ai-manager .panel-head{display:grid}.task-header-actions{justify-content:flex-start}.task-manager-history-picker select{flex-basis:100%}.task-browser .task-workspace-list{max-height:55dvh}.dashboard-task-footer{align-items:flex-start;flex-direction:column}}
+.task-workspace-row .task-header-actions{padding:4px;justify-content:flex-end}
+.task-detail-panel .panel-head .task-header-actions{flex-wrap:wrap}
+@media(max-width:600px){.task-workspace-row .task-header-actions{width:100%;justify-content:flex-start}.task-workspace-row .task-header-actions .chat-action{min-height:42px}}
+.chat-knowledge-citations{display:grid;gap:7px;margin:10px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:rgba(16,35,49,.4);font-size:12px}.chat-knowledge-citations>strong{color:var(--accent)}.chat-knowledge-source{display:grid;gap:4px;text-align:left;border:1px solid var(--line);border-radius:7px;background:transparent;padding:8px;color:var(--ink);cursor:pointer}.chat-knowledge-source span,.chat-knowledge-citations small{color:var(--muted);line-height:1.5}.knowledge-task-candidate{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:10px 0;border:1px solid var(--line);border-radius:8px;padding:10px}.knowledge-task-candidate legend{color:var(--accent);font-weight:700}.knowledge-task-candidate label{display:grid;gap:4px;font-size:11px;color:var(--muted)}.knowledge-task-candidate textarea{min-height:56px;resize:vertical}.chat-composer .consent-row select{max-width:180px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:4px}.chat-task-proposal{display:grid;gap:8px}.chat-task-proposal .primary{justify-self:start}@media(max-width:600px){.knowledge-task-candidate{grid-template-columns:1fr}}

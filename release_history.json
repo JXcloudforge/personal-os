@@ -1,0 +1,106 @@
+{
+  "current_version": "0.4.0",
+  "candidate": {
+    "version": "0.4.0",
+    "status": "source_candidate",
+    "release_date": null,
+    "note": "Prepared for source-release approval; not yet published and does not indicate production deployment."
+  },
+  "releases": [
+    {
+      "version": "0.3.3",
+      "name": "Knowledge Intelligence · 个人知识利用链路",
+      "release_date": "2026-10-14",
+      "features": [
+        "聊天可在用户主动授权后检索本人知识卡片，引用真实卡片 ID、摘要与相关片段。",
+        "知识内容作为不可信参考数据进入既有 Agent Runner/Provider，不提升为系统指令。",
+        "知识辅助任务可编辑、保持未指定日期为空，须用户明确确认后经 Task Service 幂等创建并关联来源。",
+        "增加真实浏览器 Playwright 审批链路、任务来源和消息复制验收。"
+      ],
+      "user_problem": "让用户可授权 AI 使用个人知识，核对真实来源，并把知识转为经编辑、明确确认的真实任务。",
+      "technical_details": "复用 Knowledge Service、Conversation、Agent Runner、Provider、Task Manager 与 Task Service；检索和任务关联按认证用户隔离，不新增知识或任务事实表。浏览器 E2E 使用独立 SQLite 和测试 Mock Provider，通过真实 HTTP 与 UI 操作完成审批链路。",
+      "summary": "完成个人知识检索、聊天引用和经用户确认的任务转换闭环。",
+      "verification": "隔离环境 Playwright 真实浏览器 E2E 通过（草案、编辑、批准、拒绝、幂等、来源与复制）；后端 pytest 127 passed，前端 Vitest 28 passed，TypeScript 与生产构建通过。正式 SQLite 只读 integrity_check 为 ok、外键违规 0，正式任务数未变化，PENDING 提案 #4/#5 保持原状态。没有调用真实付费 Provider。",
+      "limitations": [
+        "真实付费 Provider 的回答质量与生产数据审批未在本轮测试；本轮模型行为由本地 Mock Provider 驱动。",
+        "候选 Private 仓库已创建并配置本地 origin，但本机 Git HTTPS 无法连接 GitHub；没有推送或创建 GitHub Release。",
+        "生产登录态下的设置页、任务/知识读取与消息复制未验收；Manager 重启后健康接口和数据库检查通过，但日志记录了 previous_run_missing_exit ERROR。",
+        "当前知识检索为 SQLite 词项匹配和可解释排序，不包含向量数据库或复杂 embedding。"
+      ]
+    },
+    {
+      "version": "0.3.2",
+      "name": "Stability & Lessons · 后台稳定性修正版",
+      "release_date": "2026-10-14",
+      "features": [
+        "统一管理器采用 Start-Process + 项目 pythonw.exe + 原服务入口的无控制台启动方式，并提供健康检查、单实例保护与精确停止。",
+        "提供非交互 Start/Stop/Restart/Status 及可复用登录自启入口；不改变既有计划任务。",
+        "系统信息展示完整的稳定性经验记录；事故复盘保留失败路线、成功实验及未确认的历史根因。"
+      ],
+      "user_problem": "解决管理器窗口生命周期与 FastAPI 后台进程之间的可靠性问题，同时保留可核验的启动、健康检查、停止和回滚路径。",
+      "technical_details": "管理器在当前用户 Session 中以隐藏 PowerShell Start-Process 启动现有 backend/.venv/Scripts/pythonw.exe 和 backend/scripts/windows_service.py；启动前核验 loopback 监听与健康状态，避免重复实例，只停止核验通过的项目进程。无控制台组合有用户实测支持，但该实验不能隔离单一因果，也不是 Windows Service。",
+      "summary": "这次更新聚焦后台稳定运行、进程生命周期管理与可重复验证，并记录失败路线、成功实验与可复用原则。",
+      "lessons": ["能复现的问题，先做最小实验。", "测试通过，不代表真实部署通过。", "不是每个故障都需要新架构。", "生产数据和备份必须经过真实环境验证。", "每次稳定修改都要有版本记录和回滚路径。"],
+      "verification": "用户确认本次验收完成；登录自启、Windows 重启及异常恢复未在本轮执行。",
+      "limitations": [
+        "用户确认本次验收完成；该确认不代表 Codex 执行了桌面或生产端到端测试。",
+        "登录自启、Windows 重启及异常恢复测试本轮未执行，仍待单独验收。",
+        "注销、睡眠、关机、网络中断及分离进程的长期监督不作保证。",
+        "历史故障的具体终止发起者仍未确认；详情见 docs/postmortems/2026-10-13-background-lifecycle.md。"
+      ]
+    },
+    {
+      "version": "0.3.1",
+      "name": "AI 任务管理稳定性更新",
+      "release_date": "2026-10-13",
+      "release_datetime": "2026-10-13T16:50:25+08:00",
+      "features": [
+        "AI 自然语言任务创建、只读规划与任务修改分为明确模式，任务写入返回真实 ID 并保留幂等结果。",
+        "改进任务日期时间线、跨天安排、延期历史、每日结算及 Dashboard 今日/逾期/未排期任务。",
+        "完善任务、会话与提案回收、恢复和经预检的永久清理。",
+        "补充任务模块接口契约、删除生命周期约定及宽屏任务管理布局。"
+      ],
+      "user_problem": "让自然语言任务指令能可靠进入统一任务事实源，避免参数不清、重复执行、任务数量偏差及删除恢复行为不一致。",
+      "technical_details": "复用既有 Task、Task Service、Agent 工具注册和操作幂等记录；明确创建/规划/修改权限边界，以数据库事务提交后的真实任务 ID 确认写入，并保留状态、日期和删除审计关系。该版本继续使用 FastAPI、SQLAlchemy、SQLite 与 React，不引入第二套任务系统。",
+      "limitations": [
+        "Notion 四库未接入，结构化知识库尚未实现。",
+        "Windows 主机离线后现有 Tailnet 服务不可访问，异地自动备份尚未实现。",
+        "加密迁移包不包含用户上传的私有主题背景图，迁移前需单独备份。",
+        "本轮未代替用户完成新的 iPhone 实机与完整生产 Agent E2E 验收；既有任务创建结果由用户此前确认，后续手机操作仍需用户验收。"
+      ]
+    },
+    {
+      "version": "0.3.0",
+      "name": "AI 对话与任务工作台",
+      "release_date": "2026-10-13",
+      "features": ["分领域持久化多轮 AI 对话，支持搜索、改名、置顶、归档、恢复、软删除和完整导出。", "支持桌面会话侧栏折叠、手机抽屉及按需加载较早消息。", "AI 消息可追溯来源、工具执行和 Agent Run。", "提供结构化任务工作区、状态与证据记录，并关联会话和消息；Agent 可经授权读取当前会话关联任务。", "显示 AI Token 使用和预算；提供 Classic 与 Cyberpunk Night 主题及私有自定义背景。", "改进聊天正文、代码与表格的阅读排版。"],
+      "user_problem": "让长期 AI 对话、来源证据和可执行任务在 Windows 与手机的同一私有工作区中连续使用，并清楚区分模型陈述与真实记录。",
+      "technical_details": "以统一 Conversation、Message、Task、Agent Run 和 Source 关联承载对话、任务与来源；FastAPI 和 SQLAlchemy 负责鉴权、分页、工具审计与持久化，React 工作区负责跨设备访问和审批交互。会话归档仅隐藏活跃会话，不等于知识收录。",
+      "limitations": ["Notion 尚未集成，结构化知识卡片待 v0.4 建设。", "异地自动备份尚未接入，Windows 主机仍须在线才能访问现有 Tailnet 服务。", "加密迁移包目前不包含用户上传的私有主题背景图，迁移前需单独安全备份该文件。", "iPhone 实机的本轮 UX 与跨设备验收尚待用户确认。"]
+    },
+    {
+      "version": "0.2.0",
+      "name": "账号与数据管理",
+      "release_date": null,
+      "features": ["支持修改用户名、显示名称和登录密码，并管理其他设备会话。", "保存基础 AI 聊天记录，并提供本机数据库备份与自动备份间隔设置。", "支持加密迁移包、完整性校验和隔离环境恢复验证。", "按账号、AI、搜索、隐私、备份、运行记录和系统信息重组设置页面。"],
+      "user_problem": "让账号资料、会话和个人数据具备可管理、可备份及可迁移的基础能力。",
+      "technical_details": "复用现有 React、FastAPI、SQLAlchemy 和 SQLite 架构；聊天与备份元数据持久化在用户隔离的数据模型中。迁移包使用 SQLite 一致性快照、清单校验，并以恢复口令保护迁移材料；恢复验证在隔离临时目录执行，不覆盖运行中的数据库。",
+      "limitations": ["完整的多轮持久化会话工作区尚待 v0.3。", "异地备份尚未配置。", "新机器一键迁移与服务切换尚未完成，仍需人工准备安全配置并验证。"]
+    },
+    {
+      "version": "0.1.0",
+      "name": "基础框架",
+      "release_date": null,
+      "features": ["建立 React、Vite、TypeScript 前端与 FastAPI、SQLAlchemy、Alembic、SQLite 后端。", "提供登录、基础任务数据与个人记录页面。", "接入 DeepSeek Agent、Tavily 联网工具及后端用户权限检查。", "支持通过 Tailscale Serve 在 tailnet 内进行 HTTPS 私有访问。"],
+      "user_problem": "建立一个可由 Windows 与手机私有访问、集中保存个人任务并逐步扩展 AI 能力的应用基础。",
+      "technical_details": "采用 React 单页应用与 FastAPI 同源服务，SQLAlchemy 管理 SQLite 数据，Alembic 管理结构迁移；Agent 通过后端 Provider 与工具注册层访问模型和受限工具。Tailscale Serve 提供 tailnet HTTPS 入口，不等同于公网或独立云部署。",
+      "maintenance_results": ["后续维护补强 HTTPS Cookie 与生产密钥配置检查。", "后续维护启用 SQLite 外键、隔离测试数据库并阻止测试误写生产库。", "后续维护强化备份恢复保护，并确保 Agent 提案状态以真实持久化记录为准。"],
+      "limitations": ["上述安全加固属于后续维护成果，不代表最初框架版本已具备这些保障。", "Tailscale 私有访问依赖运行 Personal OS 的 Windows 主机在线。", "Notion 同步、云端持续运行、完整多模态和完整知识工作流尚未实现。"]
+    }
+  ],
+  "roadmap": [
+    { "version": "0.5.0", "name": "K3 知识与行动转换", "status": "planned" },
+    { "version": "0.6.0", "name": "Notion 四库只读连接", "status": "planned" },
+    { "version": "0.7.0", "name": "Notion 审批写入与知识回流", "status": "planned" }
+  ]
+}
