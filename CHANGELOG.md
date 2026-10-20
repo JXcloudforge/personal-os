@@ -101,7 +101,7 @@
 
 ### 发布及部署边界
 
-- 历史阶段记录保留其当时状态和验收成绩；最终源码候选通过与否、未验证边界和最终版本信息以 [最终发布审批报告](docs/releases/FINAL_RELEASE_APPROVAL.md) 为准。
+- 历史阶段记录保留其当时状态和验收成绩；最终源码候选通过与否、未验证边界和版本状态以 [Release Candidate Checklist](docs/releases/RELEASE_CANDIDATE_CHECKLIST.md) 的 R4a-3 附录为准。负责人审批报告单独交付，不随源码分发。
 
 ### 发布待办与未验证边界（阶段记录，按最终审批报告复核）
 
